@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.test.pushnotifications.R
+import kotlin.random.Random
 
 class MessagingService : FirebaseMessagingService() {
 
@@ -17,8 +18,16 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        /**
+         *  By default, notification will be displayed only if app is closed
+         *  or running in background.
+         */
         super.onMessageReceived(message)
 
+        /**
+         *  If we want to display notification even if the app is open, we
+         *  have to manually build a notification and show it to user.
+         */
         try {
             val notificationManager =
                 this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -34,6 +43,10 @@ class MessagingService : FirebaseMessagingService() {
                 .setContentTitle(message.notification?.title)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message.notification?.body))
 
+            /**
+             *  From Android O, notification channel needs to be created to display
+             *  notification to the user.
+             */
             if (Build.VERSION_CODES.O <= Build.VERSION.SDK_INT) {
                 notificationManager.createNotificationChannelIfNOtExists(
                     channelId = "test_channel",
@@ -43,7 +56,7 @@ class MessagingService : FirebaseMessagingService() {
             }
 
             notificationManager.notify(
-                120836789,
+                Random(System.currentTimeMillis()).nextInt(1000),
                 notificationBuilder.build()
             )
         } catch (e: Exception) {
